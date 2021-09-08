@@ -408,6 +408,16 @@ public final class SplunkSinkConnectorConfig extends AbstractConfig {
 
         Map<String, Map<String, String>> metaMap = new HashMap<>();
         int idx = 0;
+         /*
+        ** to allow the use of 'topics.regex' instead of the static list of topics.
+        ** If topics.regex is specified in the config, the Connector will subscribe to all matching topics.
+        ** If topics.regex is used, mapping from topic value to Splunk metadata will not work,
+        ** so either the Headers must define the Splunk metadata, or simply rely on the HEC token
+        ** to set default index, sourcetype, etc.
+        */
+
+        // If the config has no "topics" values, skip metamap formation
+        if(topics != null && topics.length != 0) {
         for (String topic: topics) {
             HashMap<String, String> topicMeta = new HashMap<>();
             String meta = getMetaForTopic(topicIndexes, topics.length, idx, INDEX_CONF);
@@ -427,6 +437,7 @@ public final class SplunkSinkConnectorConfig extends AbstractConfig {
 
             metaMap.put(topic, topicMeta);
             idx += 1;
+        }
         }
         return metaMap;
     }
